@@ -24,6 +24,8 @@ Configs
   (just like a linode a stackscript)
 
   config_create
+  config_destroy
+  config.save - save existing
 
   do we need Service Configs and Software Configs?
 """
