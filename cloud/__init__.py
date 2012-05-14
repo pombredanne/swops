@@ -1,5 +1,7 @@
 import os
 import json
+
+from linode import api, oop
 """
 Just notes.
 common interface to cloud services for computation (linode,
@@ -28,7 +30,7 @@ class Instance:
         pass
 
     @classmethod
-    def create(klass):
+    def create(klass, config):
         """Create an instance in the cloud."""
         pass
 
@@ -93,3 +95,17 @@ class Config:
         self.ram = data['ram']
         self.disk_size = data['disk_size']
 
+
+""" Linode Instance (extract later) """
+class LinodeInstance(Instance):
+    @classmethod
+    def create(klass, config_name):
+        config = Config(name=config_name)
+        oop.ActiveContext = api.Api(os.environ['LINODE_API_KEY'])
+        new_instance = oop.Linode()
+        new_instance.datacenter = 7 #uk
+        new_instance.plan = 1 # 512
+        new_instance.term = 1 # 1 month
+        new_instance.save()
+        new_instance.name = config.name
+        new_instance.save()

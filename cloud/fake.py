@@ -5,7 +5,7 @@ instances = []
 class FakeInstance(Instance):
 
     @classmethod
-    def create(klass, config):
+    def create(klass):
         instance = FakeInstance()
         instances.append(instance)
         return instance

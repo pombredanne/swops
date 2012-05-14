@@ -13,7 +13,7 @@ def it_can_create_an_instance():
 class WhenWeHaveAnInstance(TestCase):
     @classmethod
     def setup_class(self):
-        self.instance = FakeInstance.create()
+        self.instance = FakeInstance.create(config='test')
 
     def it_can_destroy_an_instance(self):
         FakeInstance.destroy(self.instance)
