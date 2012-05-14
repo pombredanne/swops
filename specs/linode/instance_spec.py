@@ -1,12 +1,19 @@
 import os
 from unittest import TestCase
-
+import json
 from linode import api
 
-from cloud import LinodeInstance
+#from cloud import LinodeInstance
 
 LINODE_BASE = "https://api.linode.com/api/"
-linode = api.Api(os.environ['LINODE_API_KEY'])
+def loadkey(key):
+    text = open('../../secret/keys.json').read()
+    return json.loads(text)['keys'][key]
+
+API_KEY = os.environ.get('LINODE_API_KEY', loadkey('linode.com/scraperwiki'))
+linode = api.Api(API_KEY)
+print API_KEY
+assert False
 
 class WhenWeCreateAnInstance(TestCase):
     def it_creates_a_linode_instance(self):
