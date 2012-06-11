@@ -1,7 +1,0 @@
-{
-    "cloud"         : "FakeCloud",
-    "name"          : "Test",
-    "description"   : "A terse testing description",
-    "ram"           : 512,
-    "disk_size"     : 2048
-}
