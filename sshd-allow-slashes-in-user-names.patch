@@ -1,0 +1,28 @@
+Index: openssh-5.9p1/auth1.c
+===================================================================
+--- openssh-5.9p1.orig/auth1.c	2012-08-31 09:21:19.000000000 +0000
++++ openssh-5.9p1/auth1.c	2012-08-31 09:56:58.000000000 +0000
+@@ -392,7 +392,8 @@
+ 	user = packet_get_cstring(&ulen);
+ 	packet_check_eom();
+ 
+-	if ((role = strchr(user, '/')) != NULL)
++	/* ScraperWiki patch - change role separator from / to ! so can have / in user names */
++	if ((role = strchr(user, '!')) != NULL)
+ 		*role++ = '\0';
+ 
+ 	if ((style = strchr(user, ':')) != NULL)
+Index: openssh-5.9p1/auth2.c
+===================================================================
+--- openssh-5.9p1.orig/auth2.c	2012-08-31 09:21:19.000000000 +0000
++++ openssh-5.9p1/auth2.c	2012-08-31 09:58:04.000000000 +0000
+@@ -229,7 +229,8 @@
+ 	debug("userauth-request for user %s service %s method %s", user, service, method);
+ 	debug("attempt %d failures %d", authctxt->attempt, authctxt->failures);
+ 
+-	if ((role = strchr(user, '/')) != NULL)
++	/* ScraperWiki patch - change role separator from / to ! so can have / in user names */
++	if ((role = strchr(user, '!')) != NULL)
+ 		*role++ = 0;
+ 
+ 	if ((style = strchr(user, ':')) != NULL)
