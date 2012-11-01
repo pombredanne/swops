@@ -1,6 +1,11 @@
 #!/bin/sh
 # ScraperWiki Limited 2012
-# Script to sync debian packages (installed with apt-get)
+# Script to sync a variety of packages:
+#   debian packages (installed with apt-get / aptitude)
+#   node packages (npm)
+#   python packages (pip)
+#   ruby gems (gem)
+#
 # from one machine to another.
 
 # See
@@ -18,11 +23,11 @@ chroot=/opt/basejail
 
 usage () {
   # print usage info
-  echo "apt-sync source target
-  list of debian packages is taken from source and installed on target"
+  echo "kitchen-sync [--all] [--debian] [--node] [--ruby] [--python] source target
+  list of packages is taken from source and installed on target"
 }
 
-getlist () {
+deb_getlist () {
   li sh "$source_machine" chroot $chroot aptitude -q -F "'%?p %M'" --disable-columns search \~i
 }
 
@@ -31,11 +36,17 @@ ontarget () {
   li sh "$target_machine" DEBIAN_FRONTEND=noninteractive chroot $chroot "$@"
 }
 
-sync () {
+main () {
+  managers=''
   while [ $# -gt 0 ]
   do
     case $1 in
       (--help|-h) usage; exit 0;;
+      (--all|-a) managers="deb node py rb"; shift;;
+      (--debian|-d) managers=$(printf '%s ' deb $managers); shift;;
+      (--node|-n) managers=$(printf '%s ' node $managers); shift;;
+      (--python|-p) managers=$(printf '%s ' py $managers); shift;;
+      (--ruby|-r) managers=$(printf '%s ' rb $managers); shift;;
       (-*) echo 1>&2 "option $1 unknown"; usage 1>&2; exit 4;;
       (*) break;;
     esac
@@ -47,6 +58,7 @@ sync () {
   target_machine=$2
   if [ -z "$source_machine" ] || [ -z "$target_machine" ]
   then 
+    echo 1>&2 "source and target are required"
     usage 1>&2
     exit 4
   fi
@@ -55,8 +67,16 @@ sync () {
     echo 1>&2 "li not found; try cd li; .  activate"
     exit 4
   }
+  IFS=' '
+  for m in $managers
+  do
+    ${m}_sync
+  done
+}
 
-  list=$(getlist)
+deb_sync () {
+  IFS=''
+  list=$(deb_getlist)
   # space tab newline
   IFS=' 	
 '
@@ -70,4 +90,4 @@ sync () {
   ontarget aptitude -y -o Dpkg::Options::=--force-confdef install
 }
 
-sync "$@"
+main "$@"
