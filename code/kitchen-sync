@@ -110,12 +110,10 @@ node_getlist () {
 py_sync () {
   IFS=' 	
 '
+  set -x
   py_getlist > kitchen-requirements.txt
-  # :todo: avoid doing one command per row (it's slow).
-  while read row
-  do
-    ontarget pip install $row
-  done < kitchen-requirements.txt
+  cat kitchen-requirements.txt | ontarget tee /tmp/kitchen.txt
+  ontarget pip install --requirement /tmp/kitchen.txt
 }
 
 py_getlist () {
