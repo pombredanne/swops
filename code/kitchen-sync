@@ -107,4 +107,19 @@ node_getlist () {
   onsource npm list -gp | awk -F/ '{print $6}' | sort | uniq
 }
 
+py_sync () {
+  IFS=' 	
+'
+  py_getlist > kitchen-requirements.txt
+  # :todo: avoid doing one command per row (it's slow).
+  while read row
+  do
+    ontarget pip install $row
+  done < kitchen-requirements.txt
+}
+
+py_getlist () {
+  onsource pip freeze
+}
+
 main "$@"
