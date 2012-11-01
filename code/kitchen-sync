@@ -84,6 +84,7 @@ deb_sync () {
   packages=$(echo "$list" | awk '{print $1}')
   autos=$(echo "$list" | awk '$2=="A" {print $1}')
 
+  ontarget apt-get install -qq aptitude
   ontarget aptitude update
   ontarget aptitude -q -R --schedule-only install $packages
   ontarget aptitude -q -R --schedule-only markauto $autos
@@ -107,10 +108,20 @@ node_getlist () {
   onsource npm list -gp | awk -F/ '{print $6}' | sort | uniq
 }
 
+rb_sync () {
+  IFS=' 	
+'
+  list=$(rb_getlist)
+  ontarget gem install $list
+}
+
+rb_getlist () {
+  onsource gem list 2>/dev/null| awk '{ print $1 }'
+}
+
 py_sync () {
   IFS=' 	
 '
-  set -x
   py_getlist > kitchen-requirements.txt
   cat kitchen-requirements.txt | ontarget tee /tmp/kitchen.txt
   ontarget pip install --requirement /tmp/kitchen.txt
