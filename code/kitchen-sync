@@ -27,8 +27,9 @@ usage () {
   list of packages is taken from source and installed on target"
 }
 
-deb_getlist () {
-  li sh "$source_machine" chroot $chroot aptitude -q -F "'%?p %M'" --disable-columns search \~i
+onsource () {
+  # Run command in chroot on source.
+  li sh "$source_machine" DEBIAN_FRONTEND=noninteractive chroot $chroot "$@"
 }
 
 ontarget () {
@@ -88,6 +89,22 @@ deb_sync () {
   ontarget aptitude -q -R --schedule-only markauto $autos
   ontarget mount /proc
   ontarget aptitude -y -o Dpkg::Options::=--force-confdef install
+}
+
+deb_getlist () {
+  onsource aptitude -q -F "'%?p %M'" --disable-columns search \~i
+}
+
+node_sync () {
+  IFS=' 	
+'
+  list=$(node_getlist)
+  ontarget npm install $list
+}
+
+node_getlist () {
+  # $6 so we only get top-level node packages
+  onsource npm list -gp | awk -F/ '{print $6}' | sort | uniq
 }
 
 main "$@"
