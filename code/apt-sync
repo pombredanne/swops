@@ -1,0 +1,65 @@
+#!/bin/sh
+# ScraperWiki Limited 2012
+# Script to sync debian packages (installed with apt-get)
+# from one machine to another.
+
+# See
+# http://www.debian-administration.org/article/669/Cloning_a_Debian_system_-_identical_packages_and_versions
+# for some source hints (that version preserves exact package
+# versions; we're not going to do that because it didn't work when
+# we tried it.
+
+# So that newlines are not destroyed when we do $(cmd)
+IFS=''
+
+# The location of the chroot'd basejail in both the source and
+# the target machines.
+chroot=/opt/basejail
+
+# aptitude -q -F "%?p=%?V %M" --disable-columns search \~i
+
+# aptitude -q -R --schedule-only install $(awk < $list '{print $1}')
+# aptitude -q -R --schedule-only markauto $(awk < $list '$2=="A" {split($1,A,"=");print A[1]}')
+
+# aptitude -y -o Dpkg::Options::="--force-confdef" install
+
+getlist () {
+  li sh "$source_machine" chroot $chroot aptitude -q -F "'%?p %M'" --disable-columns search \~i
+}
+
+ontarget () {
+  # Run command in chroot on target.
+  li sh "$target_machine" DEBIAN_FRONTEND=noninteractive chroot $chroot "$@"
+}
+
+sync () {
+  # We actually rely on these variables being global to the
+  # script.  drj apologises.
+  source_machine=$1
+  target_machine=$2
+  if [ -z "$source_machine" ] || [ -z "$target_machine" ]
+  then 
+    echo 1>&2 "source_machine and target_machine should both be supplied"
+    exit 4
+  fi
+  # Test to see if we can run 'li' at all
+  li > /dev/null || {
+    echo 1>&2 "li not found; try cd li; .  activate"
+    exit 4
+  }
+
+  list=$(getlist)
+  # space tab newline
+  IFS=' 	
+'
+  packages=$(echo "$list" | awk '{print $1}')
+  autos=$(echo "$list" | awk '$2=="A" {print $1}')
+
+  ontarget aptitude update
+  ontarget aptitude -q -R --schedule-only install $packages
+  ontarget aptitude -q -R --schedule-only markauto $autos
+  ontarget mount /proc
+  ontarget aptitude -y -o Dpkg::Options::=--force-confdef install
+}
+
+sync "$@"
