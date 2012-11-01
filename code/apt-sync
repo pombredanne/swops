@@ -16,12 +16,11 @@ IFS=''
 # the target machines.
 chroot=/opt/basejail
 
-# aptitude -q -F "%?p=%?V %M" --disable-columns search \~i
-
-# aptitude -q -R --schedule-only install $(awk < $list '{print $1}')
-# aptitude -q -R --schedule-only markauto $(awk < $list '$2=="A" {split($1,A,"=");print A[1]}')
-
-# aptitude -y -o Dpkg::Options::="--force-confdef" install
+usage () {
+  # print usage info
+  echo "apt-sync source target
+  list of debian packages is taken from source and installed on target"
+}
 
 getlist () {
   li sh "$source_machine" chroot $chroot aptitude -q -F "'%?p %M'" --disable-columns search \~i
@@ -33,13 +32,22 @@ ontarget () {
 }
 
 sync () {
+  while [ $# -gt 0 ]
+  do
+    case $1 in
+      (--help|-h) usage; exit 0;;
+      (-*) echo 1>&2 "option $1 unknown"; usage 1>&2; exit 4;;
+      (*) break;;
+    esac
+  done
+  
   # We actually rely on these variables being global to the
   # script.  drj apologises.
   source_machine=$1
   target_machine=$2
   if [ -z "$source_machine" ] || [ -z "$target_machine" ]
   then 
-    echo 1>&2 "source_machine and target_machine should both be supplied"
+    usage 1>&2
     exit 4
   fi
   # Test to see if we can run 'li' at all
