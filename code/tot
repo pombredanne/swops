@@ -1,0 +1,36 @@
+#!/bin/sh
+# tot
+# TOol Test
+# tot some command
+# Sets up tool development environment and runs command.
+
+# Create a symbolic link so that 'cd highrise' works (as if we
+# had git cloned this repo into a directory called highrise, or
+# whatever the tool is called.
+thisdir=$(basename $(pwd))
+case $thisdir in
+  (*-tool) toolname=$(echo $thisdir | sed 's/-tool$//');;
+  (*) echo 1>&2 "run from top-level directory that ends in -tool"
+    exit 2;;
+esac
+rm -f $toolname
+ln -fs . $toolname
+
+HOME=$(pwd)
+
+# optionally create scraperwiki.json
+if ! test -e ~/scraperwiki.json
+then
+  echo {} > ~/scraperwiki.json
+fi
+
+# optionally create http directory
+mkdir -p http
+
+# run command if supplied as argument
+if [ $# = 0 ]
+then
+  exit 0
+fi
+
+"$@"
