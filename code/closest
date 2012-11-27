@@ -1,0 +1,20 @@
+#!/bin/sh
+# closest
+
+# David Jones, ScraperWiki Limited.
+
+# Searches parent directories to find the first one that contains
+# "$1" then prints the full path, including the appended "$1".
+# example use:
+# cd $(closest swops-secret)
+
+while ! [ -e "$1" ]
+do
+  if [ "$(pwd)" = '/' ]
+  then
+    # Didn't find it, blank output
+    return 1
+  fi
+  cd ..
+done
+printf "%s\n" "$(pwd)/$1"
