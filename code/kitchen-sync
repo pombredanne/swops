@@ -124,7 +124,7 @@ py_sync () {
 '
   py_getlist > kitchen-requirements.txt
   cat kitchen-requirements.txt | ontarget tee /tmp/kitchen.txt
-  ontarget pip install --requirement /tmp/kitchen.txt
+  ontarget pip install --upgrade --requirement /tmp/kitchen.txt
 }
 
 py_getlist () {
