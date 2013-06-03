@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 while getopts s:t: o; do
   case "$o" in
@@ -7,6 +7,7 @@ while getopts s:t: o; do
     :) echo -n >&2 "$OPTARG requires argument"
        exit 1;;
     [?])  echo >&2 "Usage: $0 -s <source region> -t <target region>"
+          echo >&2 "e.g. $0 -s us-east-1 -t eu-west-1"
           exit 1;;
    esac
 done
@@ -20,8 +21,8 @@ for snapshot in $SOURCE_SNAPSHOTS
 do
   SNAPSHOT_ID=$(echo $snapshot | awk -F'\t' '{ print $3 }')
   SNAPSHOT_NAME=$(echo $snapshot | awk -F'\t' '{ print $5 }')
-  grep -q "$SNAPSHOT_NAME" <<<"$TARGET_SNAPSHOTS"
-  if [ "$?" = "1" ]; then
+
+  if ! echo $TARGET_SNAPSHOTS | grep -q "$SNAPSHOT_NAME"; then
     SNAPSHOT_ID=$(ec2-copy-snapshot --source-region $SOURCE_REGION --source-snapshot-id $SNAPSHOT_ID --region $TARGET_REGION | awk -F'\t' '{print $2}')
     ec2-create-tags $SNAPSHOT_ID --region $TARGET_REGION --tag "Name=${SNAPSHOT_NAME}"
   fi
