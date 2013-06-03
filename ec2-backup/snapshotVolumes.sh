@@ -29,4 +29,4 @@ do
 done
 unset IFS
 
-# TODO: Delete snapshots older than date?
+# TODO: Delete snapshots older than date? Can we delete the first full one?!
