@@ -9,7 +9,7 @@ while getopts m:s:z:g:d: o; do
     d) DEVICE="$OPTARG";;
     :) echo -n >&2 "$OPTARG requires argument"
        exit 1;;
-    [?])  echo >&2 "Usage: $0 <-m juju-machine-id> <-s juju-service> <-g size in GB> <-z region and zone> <-d device>"
+    '?')  echo >&2 "Usage: $0 <-m juju-machine-id> <-s juju-service> <-g size in GB> <-z region and zone> <-d device>"
           exit 1;;
    esac
 done
