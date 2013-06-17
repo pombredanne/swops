@@ -9,4 +9,8 @@ argv = require('optimist')
 exec 'juju status --format json', (err, stdout, stderr) ->
   status = JSON.parse stdout
   machine = status.machines["#{argv._}"]
-  console.log machine['instance-id']
+  if not machine
+    console.warn "Machine #{argv._} not found; try #{_.keys(status.machines)} instead."
+    process.exit 2
+  else
+    console.log machine['instance-id']
