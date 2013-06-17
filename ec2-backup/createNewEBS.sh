@@ -19,6 +19,13 @@ done
 
 : ${SERVICE?$(usage)} ${MACHINE?$(usage)} ${SIZE?$(usage)} ${ZONE?$(usage)} ${DEVICE?$(usage)}
 
+awsenv () {
+  echo "AWS_ACCESS_KEY and AWS_SECRET_KEY should be set. Do '. activate' or see ~/sw/charm-secrets/environments.yaml"
+}
+
+: ${AWS_SECRET_KEY?$(awsenv)} ${AWS_ACCESS_KEY?$(awsenv)}
+
+
 CURRENT_VOLUMES=$(ec2-describe-volumes --show-empty-fields | grep TAG | grep "$SERVICE")
 
 max_id=0
