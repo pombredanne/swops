@@ -1,25 +1,27 @@
 #!/bin/bash
 
-while getopts m:s:z:g:d: o; do
-  case "$o" in
-    s) SERVICE="$OPTARG";;
-    m) MACHINE="$OPTARG";;
-    g) SIZE="$OPTARG";;
-    z) ZONE="$OPTARG";;
-    d) DEVICE="$OPTARG";;
-    :) echo -n >&2 "$OPTARG requires argument"
-       exit 1;;
-    '?')  echo >&2 "Usage: $0 <-m juju-machine-id> <-s juju-service> <-g size in GB> <-z region and zone> <-d device>"
-          exit 1;;
-   esac
+usage () {
+  echo "Usage: $0 -m <juju-machine-id> -s <juju-service> -g <size in GB> -z <region and zone> -d <device>"
+}
+
+while [ $# != 0 ]
+do
+  case $1 in
+    (-s) SERVICE=$2; shift 2 ;;
+    (-m) MACHINE=$2; shift 2 ;;
+    (-g) SIZE=$2; shift 2 ;;
+    (-z) ZONE=$2; shift 2 ;;
+    (-d) DEVICE=$2; shift 2 ;;
+    (-*)  usage 1>&2; exit 99 ;;
+    (*) break ;;
+  esac
 done
 
-CURRENT_VOLUMES=$(ec2-describe-volumes --show-empty-fields | grep TAG | grep "$SERVICE")
-if [ "$?" = "1" ]; then
-  echo >&2 "Service not found"
-  exit 1
-fi
+: ${SERVICE?$(usage)} ${MACHINE?$(usage)} ${SIZE?$(usage)} ${ZONE?$(usage)} ${DEVICE?$(usage)}
 
+CURRENT_VOLUMES=$(ec2-describe-volumes --show-empty-fields | grep TAG | grep "$SERVICE")
+
+max_id=0
 IFS='\n'
 for volume in $CURRENT_VOLUMES
 do
