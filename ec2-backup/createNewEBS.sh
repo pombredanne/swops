@@ -25,6 +25,9 @@ awsenv () {
 
 : ${AWS_SECRET_KEY?$(awsenv)} ${AWS_ACCESS_KEY?$(awsenv)}
 
+# Check that the machine instance exists, before creating volumes so that
+# we avoid creating unattached volumes.
+ATTACH_TO_INSTANCE=$(./getInstanceByMachine.coffee $MACHINE) || exit 2
 
 CURRENT_VOLUMES=$(ec2-describe-volumes --show-empty-fields | grep TAG | grep "$SERVICE")
 
@@ -40,7 +43,5 @@ IFS=' '
 NEW_VOLUME_ID=$(ec2-create-volume --size $SIZE --availability-zone $ZONE | awk '{print $2}')
 TAG_RESULT=$(ec2-create-tags $NEW_VOLUME_ID --tag "Name=${SERVICE}:$(($max_id + 1))")
 
-
 # Attach the volume to the machine
-ATTACH_TO_INSTANCE=$(./getInstanceByMachine.coffee $MACHINE) || exit 2
 ec2-attach-volume $NEW_VOLUME_ID -i $ATTACH_TO_INSTANCE -d $DEVICE
