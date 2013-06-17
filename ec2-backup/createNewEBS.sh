@@ -42,5 +42,5 @@ TAG_RESULT=$(ec2-create-tags $NEW_VOLUME_ID --tag "Name=${SERVICE}:$(($max_id + 
 
 
 # Attach the volume to the machine
-ATTACH_TO_INSTANCE=$(./getInstanceByMachine.coffee $MACHINE)
+ATTACH_TO_INSTANCE=$(./getInstanceByMachine.coffee $MACHINE) || exit 2
 ec2-attach-volume $NEW_VOLUME_ID -i $ATTACH_TO_INSTANCE -d $DEVICE
