@@ -1,0 +1,12 @@
+#!/bin/sh
+cd ~/sw
+for a in */.git
+do
+  (
+  a=$(dirname "$a")
+  echo === $a
+  cd $a
+  git "${@:-pull}"
+  )&
+done
+wait
